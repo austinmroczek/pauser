@@ -37,6 +37,13 @@ class Listener:
         self.statsRMSdB = 0.0
         self.statsCorrelation = 0.0
 
+        import sys
+        if not 'scipy' in sys.modules:
+            self.myLog.add("ERROR: scipy module not installed")
+            print("ERROR: scipy module not installed")
+            exit()
+
+
     def audioCapture(self):
         # captures audio into a file
         # from http://www.g7smy.co.uk/?p=283
@@ -65,13 +72,6 @@ class Listener:
         # get audio data out of the file
         if audioFile=="":
             audioFile = self.fileName
-        
-        import sys
-        if not 'scipy' in sys.modules:
-            self.myLog.add("ERROR: scipy module not installed")
-            print("ERROR: scipy module not installed")
-            exit()
-        
             
         from scipy.io import wavfile 
 

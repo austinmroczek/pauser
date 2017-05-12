@@ -1,8 +1,11 @@
 #!/usr/bin/python3
 
+# TODO check that "logs" folder exists and create it if necessary
+
 import log
 myLog = log.Log("plp.log")
 myLog.add("PLP start up checks beginning")
+
 
 import plpHelper
 # check we're using the right Python version
@@ -11,6 +14,8 @@ if not plpHelper.hasRequiredPython(3,2,0): # python 3.2.0 --> hasRequiredPython(
     exit()
 
 # TODO other setup sanity checks
+
+
 
 myLog.add("PLP start up checks passed")
 
