@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# TODO check that "logs" folder exists and create it if necessary
+
 
 import log
 myLog = log.Log("plp.log")

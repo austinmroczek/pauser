@@ -6,6 +6,11 @@ class Log:
         
         self.fileName = "logs/" + newFile
     
+        # check that "logs" folder exists and create it if necessary
+        import os
+        if not os.path.isdir("logs"):
+            os.mkdir("logs")   
+    
     def add(self, newString): # add new line to log file
         
         try:
