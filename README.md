@@ -6,7 +6,7 @@
 
 ### Supported playback devices to be controlled ###
 * Roku3 
-** Other Roku versions that support the External Control Guide at https://sdkdocs.roku.com/display/sdkdoc/External+Control+Guide should work
+   * Other Roku versions that support the External Control Guide at https://sdkdocs.roku.com/display/sdkdoc/External+Control+Guide should work
  
 
 If you want to add one, see the Contribution section below
@@ -21,12 +21,12 @@ Required hardware:
 
 Software dependencies:
 * alsa-utils (pi's distribution may cause issues...see Audio capture below)
-** arecord (part of the pi's distribution)
+   * arecord (part of the pi's distribution)
 * python 3.?
 ** scipy (sudo apt-get install python3-scipy)
 
 * curl (part of the pi's distribution)
-** curl is used to query URLs to control Roku 
+   * curl is used to query URLs to control Roku 
 * more???
 
 Setup
@@ -44,13 +44,10 @@ Teach the system what is a plane:
 * ./teach.py 
 * Press P for plane, N for not, and X for exit
 * Teaching pointers
-**Teach the system many cases for both planes and not planes cases.  
-**Make sure to have at least as many cases where there is NOT a plane as that is usually the case
-**Teach in a number of scenarios in which you listen to TV.  Windows open/closed.
-**Teach with your TV on and playing show(s) you watch often
-
-Learn from what was taught
-* ./learn.py  (this will take a long time...probably minutes)
+   *Teach the system many cases for both planes and not planes cases.  
+   *Make sure to have at least as many cases where there is NOT a plane as that is usually the case
+   *Teach in a number of scenarios in which you listen to TV.  Windows open/closed.
+   *Teach with your TV on and playing show(s) you watch often
 
 ### Contribution guidelines ###
 
