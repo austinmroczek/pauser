@@ -52,8 +52,8 @@ class deciderType:
         # it is here so deciderTypeXYZ can have "startup" code without overriding the entire contstructor
         pass
 
-    def __del__(self):
-        self.myLog.add('DeciderType ' + self.deciderName + ' closing down [destructor called]')
+#    def __del__(self):
+#        self.myLog.add('DeciderType ' + self.deciderName + ' closing down [destructor called]')
 
     def setDeciderName(self,newName):
         self.deciderName = newName
@@ -167,11 +167,27 @@ class deciderType:
 
         self.correlationData = [] # first clear out the data 
 
-        file = open(self.correlationFile,'r')
-        for line in file:
-            self.correlationData.append(float(line))
-        file.close()
-        
+        if self.correlationFile == '':
+            self.myLog.add("ERROR: correlationFile was not defined")
+            exit()
+
+        import os
+        if os.path.isfile(self.correlationFile):
+
+            file = open(self.correlationFile,'r')
+            for line in file:
+                self.correlationData.append(float(line))
+            file.close()
+
+        else: # doesn't exist so create it
+            file = open(self.correlationFile,'w')
+            file.write("")
+            file.close()
+
+        # TODO check that there was actually data in the file
+        if not len(self.correlationData) > 0:
+            self.myLog.add("ERROR: there is no data in the correlationFile...use teach.py")
+                    
     def saveCorrelationData(self, newfile, myData):
         # save correlation data to a File
         file = open(newfile,'w') # open the file in write mode

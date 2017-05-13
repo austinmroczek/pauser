@@ -102,11 +102,15 @@ class deciderTypeAirplane(deciderType):
         else:
             return 0    
 
-    def calculateCorrelationData(self):
+    def calculateCorrelationData(self, newTeachPath):
         # calculates the Pearson correlation for each frequency bin
 
         import os
         from scipy.stats import pearsonr 
+        
+        import listener
+        tempListener = listener.Listener()
+        
 
         groundTruth = []
         numSamples = 0
@@ -114,11 +118,11 @@ class deciderTypeAirplane(deciderType):
         finalData = []
 
         # get list of files in recordings directory
-        filelist = os.listdir(self.teachPath)
+        filelist = os.listdir(newTeachPath)
 
         # take a filename and see if it is a .fft file
         for file in filelist:
-            fftfile = self.teachPath + file
+            fftfile = newTeachPath + file
             # check if 'file' is a file (it could be a directory)
             if os.path.isfile(fftfile) and file[-4:]=='.fft':
 
@@ -129,11 +133,11 @@ class deciderTypeAirplane(deciderType):
                     groundTruth.append(float(0))
 
                 # get the FFT data from file and add it to the list
-                correlData.append(self.getFFTData(fftfile))        
+                correlData.append(tempListener.getFFTData(fftfile))        
                 numSamples += 1
-                if len(correlData[numSamples-1]) != theListener.fftNumUsefulBins:
+                if len(correlData[numSamples-1]) != tempListener.fftNumUsefulBins:
                     print('Error: FFT in file (' + fftfile + ') not equal to expected value')
-                    print('Expected: ' + str(theListener.fftNumUsefulBins) + '\tActual: ' + str(len(correlData[numSamples-1])))
+                    print('Expected: ' + str(tempListener.fftNumUsefulBins) + '\tActual: ' + str(len(correlData[numSamples-1])))
  
 #        print(groundTruth)
   
@@ -144,7 +148,7 @@ class deciderTypeAirplane(deciderType):
 
         file.write('\n')
     
-        for freq in range(int(theListener.fftNumUsefulBins)):
+        for freq in range(int(tempListener.fftNumUsefulBins)):
             freqSet = []
             for sample in range(numSamples):
                 freqSet.append(correlData[sample][freq])
@@ -164,20 +168,56 @@ class deciderTypeAirplane(deciderType):
         # save the correlation data to a file for future use 
         self.saveCorrelationData(self.correlationFile, finalData)    
             
-    def teach(self, plane):
+    def teach(self, plane, theListener):
         # plane = True if there is a plane
 
-        self.audioCapture() # grab an audio sample
+        theListener.audioCapture() # grab an audio sample
 
         from datetime import datetime
         now = datetime.now()
         timestamp = now.strftime("%Y%m%d_%H%M_%S")
 
         if plane == True:
-            newFileName = self.teachPath + 'plane_' + str(timestamp) + '.wav'
+            newFileName = theListener.teachPath + 'plane_' + str(timestamp) + '.wav'
         else:
-            newFileName = self.teachPath + 'not_' + str(timestamp) + '.wav'
+            newFileName = theListener.teachPath + 'not_' + str(timestamp) + '.wav'
+
+        import os
+        if not os.path.isfile(theListener.fileName):
+            self.myLog.add("ERROR:  teach() the Listener filename doesn't exist")
+            print("ERROR:  teach() the Listerer filename doesn't exist")
+            exit()
 
         # move the file and change the name
+        os.rename(theListener.fileName, newFileName)
+
+    def learn(self, theListener):  # learn from collected wave files
+
         import os
-        os.rename(self.fileName, newFileName)
+
+        learnCount = 0
+    
+        # get list of files in recordings directory
+        filelist = os.listdir(theListener.teachPath)
+
+        # take a filename and see if it has an associated .fft file
+        for file in filelist:
+            wavefile = theListener.teachPath + file
+            fftfile = wavefile + '.fft'
+            # check if 'file' is a file (it could be a directory)
+            if os.path.isfile(wavefile) and wavefile[-4:]=='.wav':
+                # got a valid file name, so check if the FFT file exists
+                if not os.path.isfile(fftfile): # fft doesn't exist so make it
+                    print(wavefile + ' FFT does not exist.  Creating...')
+                    theListener.getAudioData(wavefile)
+                    theListener.doFFT()
+                    theListener.saveFFT(fftfile, theListener.fftData)
+                    learnCount += 1
+
+        if learnCount > 0:
+            print('\n\nLearned from ' + str(learnCount) + ' new WAVE files.\n\n')
+        else:
+            print('\n\nThere was nothing to learn.  You need to teach the pauser some WAVE files.\n\n') 
+
+        print('Calculating correlation...could take a while...')
+        self.calculateCorrelationData(theListener.teachPath)

@@ -8,7 +8,21 @@ class Listener:
 
         # files and paths
         self.fileName = 'rectest.wav' # default file name
+
+        import os
+        if not os.path.isfile(self.fileName):
+            file = open(self.fileName,'w')
+            file.write("")
+            file.close()        
+        
+        
+        
         self.teachPath = 'recordings/'
+
+        # check that teachPath folder exists and create it if necessary
+        import os
+        if not os.path.isdir(self.teachPath):
+            os.makedirs(self.teachPath)   
 
         # audio data        
         self.max_freq = 11025 
@@ -36,13 +50,6 @@ class Listener:
         self.statsMaxAmplitudeDB = 0.0
         self.statsRMSdB = 0.0
         self.statsCorrelation = 0.0
-
-        import sys
-        if not 'scipy' in sys.modules:
-            self.myLog.add("ERROR: scipy module not installed")
-            print("ERROR: scipy module not installed")
-            exit()
-
 
     def audioCapture(self):
         # captures audio into a file
@@ -75,7 +82,10 @@ class Listener:
             
         from scipy.io import wavfile 
 
-        # TODO: error checking on file operations...does it exist...can I access it...etc
+        import os
+        if not os.path.isfile(audioFile):
+            self.myLog.add("ERROR: audioFile does not exist")
+            exit()
             
         # https://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.io.wavfile.read.html
         self.fs, self.rawData = wavfile.read(audioFile) # load the data
@@ -166,41 +176,6 @@ class Listener:
         else:
             self.fftBinSize = float(self.fs/2)/self.fftNumUsefulBins # max frequency found is Fs/2 divided by number of real bins
 
-    def learn(self):  # learn from collected wave files
-
-        import os
-
-        learnCount = 0
-    
-        # get list of files in recordings directory
-        filelist = os.listdir(self.teachPath)
-
-        # take a filename and see if it has an associated .fft file
-        for file in filelist:
-            wavefile = self.teachPath + file
-            fftfile = wavefile + '.fft'
-            # check if 'file' is a file (it could be a directory)
-            if os.path.isfile(wavefile) and wavefile[-4:]=='.wav':
-                # got a valid file name, so check if the FFT file exists
-                if os.path.isfile(fftfile):
-                    # fft exists...do anything?
-                    #print(wavefile + ' FFT exists')
-                    pass
-                else:
-                    # fft doesn't exist so make it
-                    print(wavefile + ' FFT does not exist.  Creating...')
-                    self.getAudioData(wavefile)
-                    self.doFFT()
-                    self.saveFFT(fftfile, self.fftData)
-                    learnCount += 1
-
-        if learnCount > 0:
-            print('\n\nLearned from ' + str(learnCount) + ' new WAVE files.\n\n')
-        else:
-            print('\n\nThere was nothing to learn.  You need to teach the pauser some WAVE files.\n\n') 
-
-        print('Calculating correlation...could take a while...')
-        self.calculateCorrelationData()
         
     def calculateAweight(self): # calculate A-weight of current FFT
     
